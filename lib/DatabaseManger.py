@@ -1,9 +1,15 @@
 import pymysql
 import pymysql.cursors
 import csv
+#import logging
+
 
 class DatabaseManager:
-    def __init__(self, host="localhost", user="root", password="user", database="leadtek", charset='utf8mb4'):
+
+    #logging.basicConfig(filename='dataBase.log', filemode='w', level=logging.INFO, format='%(name)s - %(levelname)s - %(message)s')
+
+    def __init__(self, host="localhost", user="root", password="user", database="leadtek", charset='utf8mb4', logger=None): 
+        self.logger = logger
         self.db_config = {
             "host": host,
             "user": user,
@@ -14,14 +20,26 @@ class DatabaseManager:
         }
 
     def insert_product_info(self, product):
-        try:
+        try:            
             connection = pymysql.connect(**self.db_config)
             with connection.cursor() as cursor:
-                sql = "INSERT INTO `gpu` (`SID`, `DATETIME`, `ITEM`, `PRICE`) VALUES (%s, %s, %s, %s)"
-                cursor.execute(sql, (product['Id'], product['datetime'], product['name'], product['price']))
+                # Check if SID already exists
+                check_sql = "SELECT COUNT(*) FROM `gpu` WHERE `SID` = %s"
+                cursor.execute(check_sql, (product['Id'],))
+                if cursor.fetchone()['COUNT(*)'] > 0:
+                    # If exists, update the product info
+                    self.logger.info(f"Updating product info: {product['Id']}")
+                    update_sql = "UPDATE `gpu` SET `DATETIME` = %s, `ITEM` = %s, `PRICE` = %s WHERE `SID` = %s"
+                    cursor.execute(update_sql, (product['search_time'], product['name'], product['price'], product['Id']))
+                else:
+                    # If not exists, insert new product info
+                    self.logger.info(f"Inserting new product info: {product['Id']}")
+                    insert_sql = "INSERT INTO `gpu` (`SID`, `DATETIME`, `ITEM`, `PRICE`) VALUES (%s, %s, %s, %s)"
+                    cursor.execute(insert_sql, (product['Id'], product['search_time'], product['name'], product['price']))
             connection.commit()
         except Exception as e:
             print(f"Error: {e}")
+            self.logger.error(f"Error: {e}")
         finally:
             connection.close()
 
@@ -36,6 +54,7 @@ class DatabaseManager:
                     print(product)
         except Exception as e:
             print(f"Query error: {e}")
+            self.logger.error(f"Query error: {e}")
         finally:
             connection.close()
     
@@ -58,5 +77,6 @@ class DatabaseManager:
                         
         except Exception as e:
             print(f"Error exporting table to CSV: {e}")
+            self.logger.error(f"Error exporting table to CSV: {e}")
         finally:
             connection.close()

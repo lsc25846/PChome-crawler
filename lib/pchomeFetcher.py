@@ -2,11 +2,13 @@ import time
 import json
 import random
 import requests
+#import logging
 from datetime import datetime
 
 class PchomeSpider():
     """PChome線上購物 爬蟲"""
-    def __init__(self):
+    def __init__(self, logger=None):
+        self.logger = logger
         self.headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.92 Safari/537.36',
         }
@@ -22,13 +24,15 @@ class PchomeSpider():
         r = requests.get(url, params)
         print(r.url)
         if r.status_code != requests.codes.ok:
-            print(f'網頁載入發生問題：{url}')
+            print(f'Problem occurred while loading the webpage:{url}')
         try:
+            self.logger.info(f'Request succeeded:{url}{params}')
             if to_json:
                 data = r.json()
             else:
                 data = r.text
         except Exception as e:
+            self.logger.error(f'Error occurred in request:{url}{params}')
             print(e)
             return None
         return data
@@ -79,10 +83,12 @@ class PchomeSpider():
             params['page'] += 1
             data = self.request_get(url, params)
             if not data:
-                print(f'請求發生錯誤：{url}{params}')
+                print(f'Error occurred in request:{url}{params}')
+                self.logger.error(f'Error occurred in request:{url}{params}')
                 break
             if data['totalRows'] <= 0:
-                print('找不到有關的產品')
+                print('Related product not found')
+                self.logger.info('Related product not found')
                 break
             # 获取当前时间
             search_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
