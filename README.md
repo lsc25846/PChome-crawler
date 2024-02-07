@@ -7,9 +7,9 @@
 
 ##安裝流程
 ### 1.請先安裝requirements
-'''
+```
 pip install -r requirements.txt
-'''
+```
 
 ### 2.匯入gpu.sql
 先匯入gpu.sql
@@ -19,9 +19,9 @@ pip install -r requirements.txt
 
 ### 3.請在主程式(fetchGPU.py)中修改資料庫的使用者以及密碼
 
-'''python
+```python
 db_manager = DatabaseManager(host="localhost", user="root", password="user", database="leadtek", logger=logger)
-'''
+```
 
 ##使用方式
 在搜尋欄裡輸入要找查的商品名稱後按下搜尋即可。
