@@ -12,10 +12,8 @@ pip install -r requirements.txt
 ```
 
 ### 2.匯入gpu.sql
-先匯入gpu.sql
-![image]()
-再按F9或是執行按鈕
-![image]()
+先匯入gpu.sql  
+再按F9或是執行按鈕  
 
 ### 3.請在主程式(fetchGPU.py)中修改資料庫的使用者以及密碼
 
